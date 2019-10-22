@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from "axios";
 import {
   Upload,
   Layout,
@@ -10,7 +11,8 @@ import {
   message,
   Card,
   Col,
-  Row
+  Row,
+  Button
 } from "antd";
 import { Typography } from "antd";
 
@@ -20,12 +22,96 @@ const { Title } = Typography;
 const { Header, Content, Footer } = Layout;
 
 class Main extends Component {
+  componentDidMount() {
+    this.renderFile();
+  }
   state = {};
+  extention = str => {
+    switch (str) {
+      case "png":
+        return "https://cdn0.iconfinder.com/data/icons/flat-file-format/100/png-512.png";
+      case "jpg":
+        return "http://icons.iconarchive.com/icons/iconsmind/outline/512/File-JPG-icon.png";
+      case "jpeg":
+        return "http://icons.iconarchive.com/icons/iconsmind/outline/512/File-JPG-icon.png";
+      case "xls":
+        return "https://cdn4.iconfinder.com/data/icons/files-47/64/xls-512.png";
+      case "psd":
+        return "https://www.shareicon.net/data/512x512/2015/08/16/86085_adobe_512x512.png";
+      default:
+        return "https://cdn3.iconfinder.com/data/icons/logos-brands-3/24/logo_brand_brands_logos_docs_google-512.png";
+    }
+  };
+
+  deleteFile = key => {};
+  downloadFile = key => {
+    axios.get("http://localhost:5000/download?fileKey=" + key).then(() => {
+      message.success("File Downloaded check your downloads", 5);
+    });
+  };
+
+  renderFile = async () => {
+    try {
+      let res = await axios.post("http://localhost:5000/list-files");
+      let { files } = res.data.message;
+      // this will re render the view with new data
+      this.setState({
+        Posts: files.map((file, i) => (
+          <Col span={6} key={i + " file"}>
+            <Card
+              style={{ width: 300, padding: 15, marginBottom: 20 }}
+              cover={
+                <img
+                  alt="example"
+                  src={this.extention(file.fileExt.toLowerCase())}
+                />
+              }
+              actions={[
+                <Icon type="delete" key="setting" />,
+                <Icon
+                  type="download"
+                  key="edit"
+                  onClick={() => this.downloadFile(file.fileName)}
+                />
+              ]}
+            >
+              <Meta
+                title={file.fileName}
+                description={"File type " + file.fileExt}
+              />
+            </Card>
+          </Col>
+        ))
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   render() {
     const props = {
       name: "file",
+
       multiple: true,
-      action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
+      customRequest: options => {
+        const data = new FormData();
+        data.append("imageToBeEncrypted", options.file);
+        const config = {
+          headers: {
+            "content-type":
+              "multipart/form-data; boundary=----WebKitFormBoundaryqTqJIxvkWFYqvP5s"
+          }
+        };
+        axios
+          .post(options.action, data, config)
+          .then(res => {
+            options.onSuccess(res.data, options.file);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      },
+      action: "http://localhost:5000/upload", //aws_link
       onChange(info) {
         const { status } = info.file;
         if (status !== "uploading") {
@@ -85,97 +171,7 @@ class Main extends Component {
             Browse Files
           </div>
           <div style={{ background: "#ECECEC", padding: "30px" }}>
-            <Row gutter={16}>
-              <Col span={5}>
-                <Card
-                  style={{ width: 300, padding: 15 }}
-                  cover={
-                    <img
-                      alt="example"
-                      src="http://icons.iconarchive.com/icons/iconsmind/outline/512/File-JPG-icon.png"
-                    />
-                  }
-                  actions={[
-                    <Icon type="delete" key="setting" />,
-                    <Icon type="edit" key="edit" />
-                  ]}
-                >
-                  <Meta title="File Name" description="File type .jpeg" />
-                </Card>
-              </Col>
-
-              <Col span={5}>
-                <Card
-                  style={{ width: 300, padding: 15 }}
-                  cover={
-                    <img
-                      alt="example"
-                      src="https://cdn0.iconfinder.com/data/icons/flat-file-format/100/png-512.png"
-                    />
-                  }
-                  actions={[
-                    <Icon type="delete" key="setting" />,
-                    <Icon type="edit" key="edit" />
-                  ]}
-                >
-                  <Meta title="File Name" description="File type .png" />
-                </Card>
-              </Col>
-
-              <Col span={5}>
-                <Card
-                  style={{ width: 300, padding: 15 }}
-                  cover={
-                    <img
-                      alt="example"
-                      src="http://icons.iconarchive.com/icons/iconsmind/outline/512/File-JPG-icon.png"
-                    />
-                  }
-                  actions={[
-                    <Icon type="delete" key="setting" />,
-                    <Icon type="edit" key="edit" />
-                  ]}
-                >
-                  <Meta title="File Name" description="File type .jpeg" />
-                </Card>
-              </Col>
-
-              <Col span={5}>
-                <Card
-                  style={{ width: 300, padding: 15 }}
-                  cover={
-                    <img
-                      alt="example"
-                      src="https://www.shareicon.net/data/512x512/2015/08/16/86085_adobe_512x512.png"
-                    />
-                  }
-                  actions={[
-                    <Icon type="delete" key="setting" />,
-                    <Icon type="edit" key="edit" />
-                  ]}
-                >
-                  <Meta title="File Name" description="File type .psd" />
-                </Card>
-              </Col>
-
-              <Col span={4}>
-                <Card
-                  style={{ width: 300 }}
-                  cover={
-                    <img
-                      alt="example"
-                      src="https://cdn4.iconfinder.com/data/icons/files-47/64/xls-512.png"
-                    />
-                  }
-                  actions={[
-                    <Icon type="delete" key="setting" />,
-                    <Icon type="edit" key="edit" />
-                  ]}
-                >
-                  <Meta title="File Name" description="File type .xls" />
-                </Card>
-              </Col>
-            </Row>
+            <Row gutter={16}>{this.state.Posts}</Row>
           </div>
         </Content>
         <Footer style={{ textAlign: "center" }}>
