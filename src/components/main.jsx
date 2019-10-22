@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import firebase from "./firebase";
 import {
   Upload,
   Layout,
@@ -12,7 +13,7 @@ import {
   Card,
   Col,
   Row,
-  Button
+  Spin
 } from "antd";
 import { Typography } from "antd";
 
@@ -25,7 +26,12 @@ class Main extends Component {
   componentDidMount() {
     this.renderFile();
   }
-  state = {};
+  constructor(props) {
+    super(props);
+    this.renderFile = this.renderFile.bind(this);
+  }
+
+  state = { Posts: <Spin /> };
   extention = str => {
     switch (str) {
       case "png":
@@ -111,9 +117,11 @@ class Main extends Component {
             console.log(err);
           });
       },
+
       action: "http://localhost:5000/upload", //aws_link
       onChange(info) {
         const { status } = info.file;
+        console.log(status);
         if (status !== "uploading") {
           console.log(info.file, info.fileList);
         }
@@ -127,10 +135,12 @@ class Main extends Component {
     const menu = (
       <Menu>
         <Menu.Item key="0" disabled>
-          Khush Chandawat
+          {firebase.auth().currentUser.email}
         </Menu.Item>
         <Menu.Divider />
-        <Menu.Item key="1">Logout</Menu.Item>
+        <Menu.Item key="1" onClick={() => firebase.auth().signOut()}>
+          Logout
+        </Menu.Item>
       </Menu>
     );
     return (
@@ -153,7 +163,7 @@ class Main extends Component {
             <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
           </Breadcrumb>
           <div style={{ background: "#fff", padding: 24, minHeight: 10 }}>
-            Content
+            Upload Your File Here
           </div>
           <Dragger {...props}>
             <p className="ant-upload-drag-icon">
@@ -163,8 +173,8 @@ class Main extends Component {
               Click or drag file to this area to upload
             </p>
             <p className="ant-upload-hint">
-              Support for a single or bulk upload. Strictly prohibit from
-              uploading company data or other band files
+              Support for a single upload. Strictly prohibit from uploading
+              company data or other confidential files
             </p>
           </Dragger>
           <div style={{ background: "#fff", padding: 24, minHeight: 10 }}>
