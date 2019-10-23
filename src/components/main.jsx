@@ -24,6 +24,8 @@ const { Header, Content, Footer } = Layout;
 
 class Main extends Component {
   componentDidMount() {
+    this.interval = setInterval(() =>  this.renderFile() , 1500);
+
     this.renderFile();
   }
   constructor(props) {
@@ -49,7 +51,10 @@ class Main extends Component {
     }
   };
 
-  deleteFile = key => {};
+  deleteFile = key => {
+  axios.get("http://localhost:5000/delete?fileKey=" + key).then(() => {
+      message.success("File Deleted!", 5);
+    });};
   downloadFile = key => {
     axios.get("http://localhost:5000/download?fileKey=" + key).then(() => {
       message.success("File Downloaded check your downloads", 5);
@@ -73,7 +78,7 @@ class Main extends Component {
                 />
               }
               actions={[
-                <Icon type="delete" key="setting" />,
+                <Icon type="delete" key="setting" onClick={() => this.deleteFile(file.fileName)}/>,
                 <Icon
                   type="download"
                   key="edit"
@@ -95,6 +100,7 @@ class Main extends Component {
   };
 
   render() {
+  console.log(this.state.Posts);
     const props = {
       name: "file",
 
