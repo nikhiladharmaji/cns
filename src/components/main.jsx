@@ -52,18 +52,18 @@ class Main extends Component {
   };
 
   deleteFile = key => {
-  axios.get("http://localhost:5000/delete?fileKey=" + key).then(() => {
+  axios.get("http://localhost:5001/delete?fileKey=" + key).then(() => {
       message.success("File Deleted!", 5);
     });};
   downloadFile = key => {
-    axios.get("http://localhost:5000/download?fileKey=" + key).then(() => {
+    axios.get("http://localhost:5001/download?fileKey=" + key).then(() => {
       message.success("File Downloaded check your downloads", 5);
     });
   };
 
   renderFile = async () => {
     try {
-      let res = await axios.post("http://localhost:5000/list-files");
+      let res = await axios.post("http://localhost:5001/list-files");
       let { files } = res.data.message;
       // this will re render the view with new data
       this.setState({
